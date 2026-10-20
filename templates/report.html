@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Report a Problem - Campus Problem Map</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .form-container { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); max-width: 600px; margin: 20px auto; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="text"], input[type="date"], select, textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-radius: 4px; box-sizing: border-box; }
+        textarea { resize: vertical; height: 80px; }
+        .submit-btn { background: #28a745; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-size: 16px; width: 100%; }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2>Report a New Campus Problem</h2>
+        <form method="POST">
+            <div class="form-group">
+                <label>Problem Category / Type:</label>
+                <input type="text" name="problem_type" placeholder="e.g., Water Leakage, Broken Fan" required>
+            </div>
+
+            <div class="form-group">
+                <label>Description:</label>
+                <textarea name="description" placeholder="Describe the issue in detail..." required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Date Reported:</label>
+                <input type="date" name="date" required>
+            </div>
+
+            <div class="form-group">
+                <label>Priority Level:</label>
+                <select name="priority" required>
+                    <option value="Low">Low</option>
+                    <option value="Medium" selected>Medium</option>
+                    <option value="High">High</option>
+                    <option value="Urgent">Urgent</option>
+                </select>
+            </div>
+
+            <hr style="margin: 20px 0;">
+            <h3>Location Details</h3>
+
+            <div class="form-group">
+                <label>Building:</label>
+                <input type="text" name="building" placeholder="e.g., IT Block, Civil Block" required>
+            </div>
+
+            <div class="form-group">
+                <label>Floor:</label>
+                <input type="text" name="floor" placeholder="e.g., 1st Floor, Ground Floor">
+            </div>
+
+            <div class="form-group">
+                <label>Room Number:</label>
+                <input type="text" name="room_no" placeholder="e.g., Room 102">
+            </div>
+
+            <div class="form-group">
+                <label>Area / Landmark:</label>
+                <input type="text" name="area_name" placeholder="e.g., Near Faculty Room, Washroom" required>
+            </div>
+
+            <button type="submit" class="submit-btn">Submit Report</button>
+        </form>
+        <p style="text-align: center; margin-top: 15px;">
+            <a href="/" style="color: #6c757d; text-decoration: none;">Cancel & Back to Dashboard</a>
+        </p>
+    </div>
+</body>
+</html>
