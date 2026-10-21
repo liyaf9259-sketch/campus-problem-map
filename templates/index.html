@@ -2,82 +2,139 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Campus Problem Map</title>
-    <!-- Linked to static/style.css using Flask's url_for -->
+    <title>Campus Problem Map - Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .filter-bar {
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        .filter-bar input, .filter-bar select {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 0.95em;
+        }
+        .problem-card {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .problem-card p {
+            margin: 6px 0;
+            color: #333;
+        }
+        .badge {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-    <div class="header-bar">
-        <h1>Campus Problem Map Dashboard</h1>
-        <div>
-            <span>Current Role: <strong>{{ role | capitalize }}</strong></span> | 
-            <a href="/login" class="btn role-btn">Switch Role</a>
-        </div>
-    </div>
-
-    <!-- Flash Messages Block -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div style="background: {% if category == 'error' %}#f8d7da{% else %}#d4edda{% endif %}; 
-                            color: {% if category == 'error' %}#721c24{% else %}#155724{% endif %}; 
-                            padding: 12px; border-radius: 5px; margin-bottom: 20px; border: 1px solid {% if category == 'error' %}#f5c6cb{% else %}#c3e6cb{% endif %};">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-    
-    <a href="/report" class="btn">Report a New Problem</a>
-    <hr>
-
-    <!-- Search, Filter, and Sort Form -->
-    <form method="GET" class="filter-form">
-        <input type="text" name="search" placeholder="Search type, building..." value="{{ search_query }}">
+    <div class="container" style="max-width: 1000px; margin: 30px auto; padding: 0 20px;">
         
-        <select name="status">
-            <option value="">All Statuses</option>
-            <option value="Pending" {% if status_filter == 'Pending' %}selected{% endif %}>Pending</option>
-            <option value="In Progress" {% if status_filter == 'In Progress' %}selected{% endif %}>In Progress</option>
-            <option value="Resolved" {% if status_filter == 'Resolved' %}selected{% endif %}>Resolved</option>
-        </select>
-
-        <select name="priority">
-            <option value="">All Priorities</option>
-            <option value="Low" {% if priority_filter == 'Low' %}selected{% endif %}>Low</option>
-            <option value="Medium" {% if priority_filter == 'Medium' %}selected{% endif %}>Medium</option>
-            <option value="High" {% if priority_filter == 'High' %}selected{% endif %}>High</option>
-            <option value="Urgent" {% if priority_filter == 'Urgent' %}selected{% endif %}>Urgent</option>
-        </select>
-
-        <select name="sort">
-            <option value="newest" {% if sort_option == 'newest' %}selected{% endif %}>Newest First</option>
-            <option value="oldest" {% if sort_option == 'oldest' %}selected{% endif %}>Oldest First</option>
-            <option value="priority" {% if sort_option == 'priority' %}selected{% endif %}>Priority (Urgent First)</option>
-        </select>
-
-        <button type="submit" class="filter-btn">Apply</button>
-        <a href="/" style="color: #007bff; text-decoration: none;">Reset</a>
-    </form>
-
-    <h2>Reported Problems</h2>
-    <ul>
-        {% for problem in problems %}
-            <li>
-                <strong>Category:</strong> {{ problem['problem_type'] }}<br>
-                <strong>Description:</strong> {{ problem['description'] }}<br>
-                <span class="location-tag">Location:</span> Building: {{ problem['building'] }} | Floor: {{ problem['floor'] }} | Room: {{ problem['room_no'] }} | Area: {{ problem['area_name'] }}<br>
-                <strong>Date:</strong> {{ problem['date'] }} | <strong>Priority:</strong> {{ problem['priority'] }} | <strong>Status:</strong> {{ problem['status'] }}<br>
-                
-                {% if role == 'staff' %}
-                    <a href="/update/{{ problem['problem_id'] }}" class="update-btn">Staff: Update Status</a>
-                    <form action="/delete/{{ problem['problem_id'] }}" method="POST" style="display:inline; margin-left: 5px;">
-                        <button type="submit" onclick="return confirm('Are you sure you want to delete this problem?');" style="padding: 5px 10px; background: #dc3545; color: white; border: none; border-radius: 4px; font-size: 14px; cursor: pointer; margin-top: 10px;">Delete</button>
-                    </form>
+        <!-- Header -->
+        <header style="display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 20px;">
+            <h1 style="margin: 0; font-size: 1.8em;">Campus Problem Map Dashboard</h1>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <span style="font-size: 0.95em;">Current Role: <strong>{{ role_name }}</strong> |</span>
+                <a href="{{ url_for('role_select') }}" class="btn" style="background-color: #f8f9fa; color: #333; border: 1px solid #ccc; padding: 6px 12px; text-decoration: none; border-radius: 4px;">Switch Role</a>
+                {% if session.get('user_id') %}
+                    <a href="{{ url_for('logout') }}" class="btn" style="background-color: #d9534f; color: white; padding: 6px 12px; text-decoration: none; border-radius: 4px;">Logout</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="btn" style="background-color: #007bff; color: white; padding: 6px 12px; text-decoration: none; border-radius: 4px;">Admin Login</a>
                 {% endif %}
-            </li>
+            </div>
+        </header>
+
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div style="padding: 12px; margin-bottom: 15px; background-color: {% if category == 'success' %}#d4edda{% else %}#f8d7da{% endif %}; color: {% if category == 'success' %}#155724{% else %}#721c24{% endif %}; border-radius: 4px;">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div style="margin-bottom: 20px;">
+            <a href="{{ url_for('report') }}" class="btn" style="text-decoration: none; padding: 10px 18px; background-color: #4f46e5; color: white; border-radius: 6px; font-weight: bold; display: inline-block;">Report a New Problem</a>
+        </div>
+
+        <!-- Filter & Search Bar: ADMIN ONLY -->
+        {% if session.get('user_id') %}
+        <form method="GET" action="{{ url_for('index') }}" class="filter-bar">
+            <input type="text" name="search" placeholder="Search type, building..." value="{{ search }}" style="flex: 2; min-width: 200px;">
+            
+            <select name="status" style="flex: 1;">
+                <option value="All" {% if current_status == 'All' %}selected{% endif %}>All Statuses</option>
+                <option value="Pending" {% if current_status == 'Pending' %}selected{% endif %}>Pending</option>
+                <option value="In Progress" {% if current_status == 'In Progress' %}selected{% endif %}>In Progress</option>
+                <option value="Resolved" {% if current_status == 'Resolved' %}selected{% endif %}>Resolved</option>
+            </select>
+
+            <select name="priority" style="flex: 1;">
+                <option value="All" {% if current_priority == 'All' %}selected{% endif %}>All Priorities</option>
+                <option value="High" {% if current_priority == 'High' %}selected{% endif %}>High</option>
+                <option value="Medium" {% if current_priority == 'Medium' %}selected{% endif %}>Medium</option>
+                <option value="Low" {% if current_priority == 'Low' %}selected{% endif %}>Low</option>
+            </select>
+
+            <select name="sort" style="flex: 1;">
+                <option value="newest" {% if current_sort == 'newest' %}selected{% endif %}>Newest First</option>
+                <option value="status" {% if current_sort == 'status' %}selected{% endif %}>Status</option>
+                <option value="priority" {% if current_sort == 'priority' %}selected{% endif %}>Priority</option>
+            </select>
+
+            <button type="submit" style="padding: 8px 16px; background-color: #1f2937; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Apply</button>
+            <a href="{{ url_for('index') }}" style="padding: 8px 12px; background-color: #e5e7eb; color: #374151; text-decoration: none; border-radius: 4px; font-size: 0.9em;">Reset</a>
+        </form>
+        {% endif %}
+
+        <h2 style="margin-bottom: 15px;">Reported Problems</h2>
+
+        <!-- Problem Cards -->
+        {% if problems %}
+            {% for problem in problems %}
+            <div class="problem-card">
+                <p><strong>Category:</strong> {{ problem['title'] }}</p>
+                <p><strong>Description:</strong> {{ problem['description'] }}</p>
+                <p><strong style="color: #c53030;">Location:</strong> Building: {{ problem['building'] }} | Floor: {{ problem['floor'] }} | Room: {{ problem['room_number'] }} | Area: {{ problem['area'] }}</p>
+                <p>
+                    <strong>Date:</strong> {{ problem['date'] }} | 
+                    <strong>Priority:</strong> <span style="color: {% if problem['priority'] == 'High' %}#dc2626{% else %}#d97706{% endif %}; font-weight: bold;">{{ problem['priority'] }}</span> | 
+                    <strong>Status:</strong> 
+                    <span class="badge" style="background-color: {% if problem['status'] == 'Resolved' %}#d4edda{% elif problem['status'] == 'In Progress' %}#fff3cd{% else %}#f8d7da{% endif %}; color: {% if problem['status'] == 'Resolved' %}#155724{% elif problem['status'] == 'In Progress' %}#856404{% else %}#721c24{% endif %};">
+                        {{ problem['status'] }}
+                    </span>
+                </p>
+
+                <!-- Admin Action Links -->
+                {% if session.get('user_id') %}
+                <div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid #eee;">
+                    <a href="{{ url_for('update_problem', problem_id=problem['problem_id']) }}" style="color: #007bff; text-decoration: none; margin-right: 15px; font-weight: bold;">Update Status</a>
+                    <a href="{{ url_for('delete_problem', problem_id=problem['problem_id']) }}" style="color: #dc3545; text-decoration: none; font-weight: bold;" onclick="return confirm('Delete this report?')">Delete</a>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
         {% else %}
-            <li>No problems found matching your criteria.</li>
-        {% endfor %}
-    </ul>
+            <p style="color: #666; background: #fff; padding: 20px; border-radius: 8px; text-align: center;">No problems found matching your criteria.</p>
+        {% endif %}
+
+    </div>
 </body>
+</html>

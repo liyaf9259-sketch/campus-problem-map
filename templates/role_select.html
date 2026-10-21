@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Select Role - Campus Problem Map</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .role-container {
+            max-width: 500px;
+            margin: 80px auto;
+            text-align: center;
+            padding: 40px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .role-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin: 15px 0;
+            font-size: 1.1em;
+            font-weight: bold;
+            text-decoration: none;
+            color: white;
+            border-radius: 5px;
+            transition: background 0.2s;
+        }
+        .btn-student { background-color: #007bff; }
+        .btn-student:hover { background-color: #0056b3; }
+        .btn-admin { background-color: #28a745; }
+        .btn-admin:hover { background-color: #1e7e34; }
+    </style>
+</head>
+<body>
+    <div class="role-container">
+        <h2>Welcome to Campus Problem Map</h2>
+        <p style="color: #666; margin-bottom: 30px;">Please select your portal to continue:</p>
+        
+        <a href="{{ url_for('index') }}" class="role-btn btn-student">👤 Continue as Student (View & Report)</a>
+        <a href="{{ url_for('login') }}" class="role-btn btn-admin">🔐 Login as Administrator</a>
+    </div>
+</body>
+</html>

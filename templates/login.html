@@ -2,32 +2,37 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Select Role - Campus Problem Map</title>
+    <title>Login - Campus Problem Map</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <style>
-        .form-card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); max-width: 400px; margin: 40px auto; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        select { width: 100%; box-sizing: border-box; }
-        .submit-btn { width: 100%; background: #007bff; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 10px; }
-    </style>
 </head>
 <body>
-    <div class="form-card">
-        <h2>Switch User Role</h2>
+    <div class="container">
+        <h2>Admin Login</h2>
+        
+        <!-- Flash messages display -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
         <form method="POST">
             <div class="form-group">
-                <label for="role">Select Role:</label>
-                <select name="role" id="role" required>
-                    <option value="student">Student</option>
-                    <option value="staff">Staff / Admin</option>
-                </select>
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
             </div>
-            <button type="submit" class="submit-btn">Save Role</button>
+            
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            
+            <button type="submit" class="btn">Login</button>
         </form>
-        <p style="text-align: center; margin-top: 15px;">
-            <a href="/" style="color: #6c757d; text-decoration: none;">Back to Dashboard</a>
-        </p>
+        
+        <p><a href="{{ url_for('index') }}">Back to Dashboard</a></p>
     </div>
 </body>
 </html>
